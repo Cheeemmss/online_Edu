@@ -33,7 +33,7 @@
                         width="210">
                     </el-table-column>
                     <el-table-column
-                        prop="teachmode"
+                        prop=""
                         label="任务数"
                         width="90">
                     </el-table-column>
@@ -43,7 +43,7 @@
                         width="200">
                     </el-table-column>
                     <el-table-column
-                        prop="teachmode"
+                        prop=""
                         label="是否付费"
                         width="110">
                     </el-table-column>
@@ -153,30 +153,12 @@ export default {
             },
 
             courseAuditStatus: [{
-                value: '202001',
-                label: '审核未通过'
-                }, {
-                value: '202002',
-                label: '未提交'
-                }, {
-                value: '202003',
-                label: '已提交'
-                }, {
-                value: '202004',
-                label: '审核通过'
-                }], 
-
-            coursePublishStatus: [{
-                value: '203001',
-                label: '未发布'
-                }, {
-                value: '203002',
-                label: '已发布'
-                }, {
-                value: '203003',
-                label: '已下线'
-                },],
-            }
+                value: '202001',label: '审核未通过'}, {value: '202002',label: '未提交'}, {value: '202003',label: '已提交'}, {value: '202004',label: '审核通过'}
+            ], 
+            coursePublishStatus: [{value: '203001',label: '未发布'}, {value: '203002',label: '已发布'}, {value: '203003',label: '已下线'},
+            ],
+            toAddCourseVisible: false
+          }
         },
         created(){
            this.load()
@@ -202,7 +184,8 @@ export default {
         serachCourse(){
         //    console.log(this.queryCourseParams)
            this.load()
-        },    
+        },
+
         addCourse(){
             this.$router.push('/manage/addCourse')
         },

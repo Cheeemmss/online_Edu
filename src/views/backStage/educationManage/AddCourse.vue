@@ -1,13 +1,208 @@
 <template>
 <div class="wrapper">
     <el-card shadow="always">
-        <el-cascader  
-        v-model="value"
-        :options="options"
-        @change="handleChange"
-        clearable>
-        </el-cascader>
-    </el-card>
+          <DetailsTag tagName="添加课程"></DetailsTag>
+          <!-- 步骤条begin -->
+          <el-steps :active="active" style="margin-bottom:20px;" finish-status="success">
+          <el-step title="选择课程形式" description="选择发布的课程是直播课程还是录播课程"></el-step>
+          <el-step title="填写课程基本信息" description="完善课程的基本信息和营销信息"></el-step>
+          <el-step title="填写课程计划" description="填写课程的大纲目录/章节/小节 并上传课程视频"></el-step>
+          <el-step title="填写讲师信息" description="完善课程讲师的基本信息"></el-step>
+          </el-steps>
+          <!-- 步骤条end -->
+
+
+        <!-- 1 课程类型-->
+        <div v-if="active == 0">
+              <el-card style="width:40%;margin: 50px auto;background-color: rgb(249, 253, 255);" shadow="never">
+                <div>
+                    <el-card class="radio_wrapper" shadow="hover">
+                        <el-image
+                        class="radio_bgimg"
+                        :src="livePng"
+                        >
+                        </el-image>
+                        <el-radio v-model="courseBaseInfoForm.teachmode" label="200003"  class="radio_sty">直播课程</el-radio>
+                    </el-card>
+                    <el-card class="radio_wrapper" shadow="hover">
+                        <el-image
+                        class="radio_bgimg"
+                        :src="recordPng"
+                        >
+                        </el-image>
+                        <el-radio v-model="courseBaseInfoForm.teachmode" label="200002"  class="radio_sty">录播课程</el-radio>
+                    </el-card>
+                </div>
+              </el-card>
+
+  
+              <el-button type="primary" @click="active ++" class="one_next_btn" size="medium">下一步</el-button>
+        </div>
+
+        <!-- 2 课程基本信息-->
+        <div v-if="(active == 1)">
+            <el-form ref="courseBaseInfoForm" :model="courseBaseInfoForm" label-width="80px" class="baseInfoForm" :rules="courseBaseInfoFormRules">
+                <el-form-item label="课程名称" prop="name">
+                    <el-input style="width:280px;"
+                    maxlength="20"
+                    show-word-limit
+                    placeholder="请输入课程名称"
+                    v-model="courseBaseInfoForm.name"
+                    clearable>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="课程标签">
+                    <el-input style="width:280px;"
+                    maxlength="10"
+                    show-word-limit
+                    placeholder="请输入课程标签"
+                    v-model="courseBaseInfoForm.tags"
+                    clearable>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="课程分类" prop="courseCategoryArr">
+                    <el-cascader  placeholder="请选择课程分类"
+                    v-model="courseCategoryArr"
+                    :options="courseCategoryOptions"
+                    @change="handleChange"
+                    >
+                    </el-cascader>
+                </el-form-item>
+                <el-form-item label="课程等级" prop="grade">
+                    <el-select v-model="courseBaseInfoForm.grade" placeholder="请选择课程等级">
+                        <el-option
+                        v-for="item in courseGradeOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="课程简介">
+                    <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="请输入课程简介"
+                    v-model="courseBaseInfoForm.description">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="适用人群" prop="users">
+                    <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="请输入适用人群"
+                    v-model="courseBaseInfoForm.users">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="课程封面">
+                    <el-upload
+                        action="https://jsonplaceholder.typicode.com/posts/"
+                        list-type="picture-card"
+                        :limit="1">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="课程类型" prop="charge">
+                    <el-radio v-model="courseBaseInfoForm.charge" label="201000">免费</el-radio>
+                    <el-radio v-model="courseBaseInfoForm.charge" label="201001">收费</el-radio>
+                </el-form-item>
+                <el-form-item v-if="courseBaseInfoForm.charge == '201001'" label="课程价格">
+                    <el-input style="width:280px;"
+                    placeholder="请输入课程价格"
+                    v-model="courseBaseInfoForm.price"
+                    clearable>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="咨询QQ">
+                    <el-input style="width:280px;"
+                    placeholder="请输入咨询QQ"
+                    v-model="courseBaseInfoForm.qq"                   
+                    clearable>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="咨询微信">
+                    <el-input style="width:280px;"
+                    placeholder="请输入咨询微信"
+                    v-model="courseBaseInfoForm.wechat"          
+                    clearable>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="联系电话">
+                    <el-input style="width:280px;"
+                    v-model="courseBaseInfoForm.phone"    
+                    placeholder="请输入联系电话"
+                    clearable>
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="有效期(天)">
+                    <el-input style="width:280px;"
+                    placeholder="请输入课程有效期"
+                    v-model="courseBaseInfoForm.validDays"    
+                    clearable>
+                    </el-input> 
+                </el-form-item>
+            </el-form>
+              <el-button @click="pre()"  class="pre_btn" size="medium">上一步</el-button>
+              <el-button type="primary" ckass="next_btn" @click="courseBaseNextBtn()" size="medium">下一步</el-button>
+        </div>
+
+        <!-- 3 课程计划-->
+        <div v-if="(active == 2)">
+            <el-button @click="addChapter"  type="primary" plain icon="el-icon-plus">添加章节</el-button>
+            <el-tree 
+            :data="data"
+            node-key="id"
+            default-expand-all
+            :expand-on-click-node="false"
+            style="margin-top:20px;margin-bottom: 25px;">
+                <div class="custom-tree-node" slot-scope="{ node, data }"> 
+                    <el-input style="width:250px;" v-model="data.label" 
+                    placeholder="请输入章节名称" maxlength="20" show-word-limit clearable>
+                   </el-input>
+
+                    <el-input style="width:200px;margin-left: 10px;" v-model="data.video" 
+                    placeholder="请选择章节视频">
+                    </el-input>  
+
+                    <el-switch  
+                        v-if="data.isLeaf == true"
+                        v-model="data.free"
+                        active-value="201000"
+                        inactive-value="201001"
+                        active-text="免费"
+                        style="margin-left:10px;">
+                    </el-switch>
+
+                    <el-button
+                        style="float:right;font-size: 16px;"
+                        type="primary"
+                        plain
+                        size="small"
+                        @click="() => remove(node, data)">
+                        删除本章
+                    </el-button>
+                    <el-button
+                        v-if="data.isLeaf == false"
+                        style="float:right;margin-right: 5px;font-size: 16px;"
+                        type="primary"
+                        plain
+                        size="small"
+                        @click="() => append(data)">
+                        添加小结
+                    </el-button>
+                </div>
+            </el-tree>
+            <el-button @click="pre()"  style="margin-left: 35%;margin-right: 140px;" size="medium">上一步</el-button>
+            <el-button type="primary" @click="active ++" style="margin-left: 35px;" size="medium">下一步</el-button>
+        </div>
+
+        <!-- 4 讲师信息-->
+        <div v-if="(active == 3)">
+            this is four
+            <el-button @click="pre()"  style="margin-left: 35px;" size="medium">上一步</el-button>
+            <el-button type="primary" @click="" style="margin-right: 35px;" size="medium">保存</el-button>
+        </div>
+    </el-card>           
 </div>
 </template>
 
@@ -16,15 +211,98 @@
     width: 80%;
     margin: 20px auto;
 }
+.radio_wrapper {
+    display: inline-block;
+    width: 30%;
+    height: 180px;
+    margin: 30px 0px 30px 70px;
+}
+.radio_sty {
+    width: 80%;
+    margin: 25px 0px 0px 12px;
+    text-align: center;
+    font-weight: 900;
+}
+.radio_bgimg {
+     margin-left: 14%;
+     width: 100px;
+     height: 100px;
+}
+.one_next_btn {
+       margin-left:48%;
+}
+.baseInfoForm {
+    width: 650px;
+    margin: 30px auto;
+    font-weight: 900;
+}
+.pre_btn {
+    margin-left: 35%;
+    margin-right: 140px;
+}
+.el-tree-node__content {
+    height: 65px;
+}
+.custom-tree-node {
+     width: 800px;
+     height: 40px;
+     background-color: rgb(241, 241, 241);
+     border-radius: 15px;
+     padding: 10px;
+     line-height: 40px;
+}
 </style>
 <script>
+import livePng from '@/assets/live.png'
+import recordPng from '@/assets/record.png'
+import DetailsTag from '@/components/DetailsTag.vue'
 export default {
+    components :{
+        DetailsTag
+    },
+    
     data(){
         return {
-            value: [],
-            options: [
+            //logo相关
+            livePng: livePng,
+            recordPng: recordPng,
+            active: 2,
 
-            ]
+            //课程基本信息&&营销信息
+            courseCategoryArr: ['1-1', '1-1-1'],
+            courseBaseInfoForm: {
+                teachmode: '200002',
+                name: '',
+                tags: '',
+                //课程大分类 课程小分类
+                mt : '',
+                st : '',
+                grade: '',
+                description: '',
+                users: '',
+                pic: '',
+                charge: '201000',
+                price: '',
+                objectives: '',
+                qq: '',
+                wechat: '',
+                phone: '',
+                validDays: '',
+            },
+            courseCategoryOptions: [],
+            courseGradeOptions: [
+                {value:"204001", label:"初级"},{value:"204002", label:"中级"},{value:"204003", label:"高级"}
+            ],
+            courseBaseInfoFormRules:{
+                name: [{ required: true, message: '课程名称不可以为空', trigger: 'blur' }],
+                grade: [{ required: true, message: '请选择课程等级', trigger: 'change' }],
+                users: [{ required: true, message: '适用人群不可以为空', trigger: 'blur' }],
+                charge: [{ required: true, message: '请选择课程收费类型', trigger: 'change' }],
+            },
+
+            //课程计划信息
+            id: 1,
+            data: []
         }
     },
     created(){
@@ -36,7 +314,7 @@ export default {
             .then(res => {
                  if(res.code == 200){
                     console.log(res.data);
-                    this.options = res.data
+                    this.courseCategoryOptions = res.data
                  }
             })
             .catch(err => {
@@ -44,8 +322,38 @@ export default {
             })
         },
         handleChange(value) {
-            console.log(value);
-        }
+            //分别通过数组给大分类和小分类赋值
+            this.courseBaseInfoForm.mt = value[0]
+            this.courseBaseInfoForm.st = value[1]         
+        },
+        pre(){
+             this.active --
+        },
+        courseBaseNextBtn() {
+            this.$refs['courseBaseInfoForm'].validate((valid) => {
+                valid ? this.active ++ :  false
+            })                 
+        },
+        //添加大章节
+        addChapter(){
+            const newChild = { id: this.id++, label: '', children: [],isLeaf:false,free:'201001',video:''};
+            this.data.push(newChild);
+        },
+        //添加小节
+        append(data) {
+            const newChild = { id: this.id++, label: '', children: [], isLeaf:true, free:'201001',video:''};
+            if (!data.children) {
+               this.$set(data, 'children', []);
+            }
+            data.children.push(newChild);
+       },
+        remove(node, data) {
+            const parent = node.parent;
+            const children = parent.data.children || parent.data;
+            let index = children.findIndex(d => d.id === data.id);
+            children.splice(index, 1);
+        },
+
     },
 }
 </script>
