@@ -19,6 +19,11 @@ const routes = [
         name : 'addCourse',
         path : 'addCourse',
         component: ()=>import('@/views/backStage/educationManage/AddCourse.vue')
+       },
+       {
+        name: 'editRecordsCourse',
+        path: 'editRecordsCourse',
+        component: ()=>import('@/views/backStage/educationManage/EditRecordCourse.vue')
        }
     ] 
   }

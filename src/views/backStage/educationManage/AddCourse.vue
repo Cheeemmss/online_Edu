@@ -3,12 +3,18 @@
     <el-card shadow="always">
           <DetailsTag tagName="添加课程"></DetailsTag>
           <!-- 步骤条begin -->
-          <el-steps :active="active" style="margin-bottom:20px;" finish-status="success">
+          <el-steps :active="active" style="margin-bottom:20px;" finish-status="success" v-if="courseBaseInfoForm.teachmode == 200002">
           <el-step title="选择课程形式" description="选择发布的课程是直播课程还是录播课程"></el-step>
           <el-step title="填写课程基本信息" description="完善课程的基本信息和营销信息"></el-step>
           <el-step title="填写课程计划" description="填写课程的大纲目录/章节/小节 并上传课程视频"></el-step>
           <el-step title="填写讲师信息" description="完善课程讲师的基本信息"></el-step>
           </el-steps>
+          <!-- <el-steps :active="active" style="margin-bottom:20px;" finish-status="success" v-if="courseBaseInfoForm.teachmode == 200003">
+          <el-step title="选择课程形式" description="选择发布的课程是直播课程还是录播课程"></el-step>
+          <el-step title="填写课程基本信息" description="直播step2"></el-step>
+          <el-step title="填写课程计划" description="直播step3"></el-step>
+          <el-step title="填写讲师信息" description="直播step4"></el-step>
+          </el-steps> -->
           <!-- 步骤条end -->
 
 
@@ -44,7 +50,7 @@
             <el-form ref="courseBaseInfoForm" :model="courseBaseInfoForm" label-width="80px" class="baseInfoForm" :rules="courseBaseInfoFormRules">
                 <el-form-item label="课程名称" prop="name">
                     <el-input style="width:280px;"
-                    maxlength="20"
+                    maxlength="25"
                     show-word-limit
                     placeholder="请输入课程名称"
                     v-model="courseBaseInfoForm.name"
@@ -53,8 +59,6 @@
                 </el-form-item>
                 <el-form-item label="课程标签">
                     <el-input style="width:280px;"
-                    maxlength="10"
-                    show-word-limit
                     placeholder="请输入课程标签"
                     v-model="courseBaseInfoForm.tags"
                     clearable>
@@ -98,7 +102,8 @@
                     <el-upload
                         action="https://jsonplaceholder.typicode.com/posts/"
                         list-type="picture-card"
-                        :limit="1">
+                        :limit="1"
+                        :on-exceed="overLimit">
                         <i class="el-icon-plus"></i>
                     </el-upload>
                 </el-form-item>
@@ -106,10 +111,10 @@
                     <el-radio v-model="courseBaseInfoForm.charge" label="201000">免费</el-radio>
                     <el-radio v-model="courseBaseInfoForm.charge" label="201001">收费</el-radio>
                 </el-form-item>
-                <el-form-item v-if="courseBaseInfoForm.charge == '201001'" label="课程价格">
+                <el-form-item v-if="courseBaseInfoForm.charge == '201001'" label="课程价格" prop="price">
                     <el-input style="width:280px;"
                     placeholder="请输入课程价格"
-                    v-model="courseBaseInfoForm.price"
+                    v-model.number="courseBaseInfoForm.price"
                     clearable>
                     </el-input>
                 </el-form-item>
@@ -134,38 +139,38 @@
                     clearable>
                     </el-input>
                 </el-form-item>
-                <el-form-item label="有效期(天)">
+                <el-form-item label="有效期(天)" prop="validDays">
                     <el-input style="width:280px;"
                     placeholder="请输入课程有效期"
-                    v-model="courseBaseInfoForm.validDays"    
+                    v-model.number="courseBaseInfoForm.validDays"    
                     clearable>
                     </el-input> 
                 </el-form-item>
             </el-form>
               <el-button @click="pre()"  class="pre_btn" size="medium">上一步</el-button>
-              <el-button type="primary" ckass="next_btn" @click="courseBaseNextBtn()" size="medium">下一步</el-button>
+              <el-button type="primary" ckass="next_btn" @click="courseBaseNextBtn()" size="medium">保存并进行下一步</el-button>
         </div>
 
         <!-- 3 课程计划-->
         <div v-if="(active == 2)">
             <el-button @click="addChapter"  type="primary" plain icon="el-icon-plus">添加章节</el-button>
             <el-tree 
-            :data="data"
+            :data="teachPlanData"
             node-key="id"
             default-expand-all
             :expand-on-click-node="false"
             style="margin-top:20px;margin-bottom: 25px;">
                 <div class="custom-tree-node" slot-scope="{ node, data }"> 
-                    <el-input style="width:250px;" v-model="data.label" 
-                    placeholder="请输入章节名称" maxlength="20" show-word-limit clearable>
+                    <el-input style="width:250px;" v-model="data.pname" 
+                    placeholder="请输入章节名称" maxlength="25" show-word-limit clearable @blur="editCoursePlan(data)">
                    </el-input>
 
-                    <el-input style="width:200px;margin-left: 10px;" v-model="data.video" 
+                    <el-input v-if="data.parentid != 0" style="width:200px;margin-left: 10px;" v-model="data.video" 
                     placeholder="请选择章节视频">
                     </el-input>  
 
                     <el-switch  
-                        v-if="data.isLeaf == true"
+                        v-if="data.parentid != 0"
                         v-model="data.free"
                         active-value="201000"
                         inactive-value="201001"
@@ -182,7 +187,7 @@
                         删除本章
                     </el-button>
                     <el-button
-                        v-if="data.isLeaf == false"
+                        v-if="data.parentid == 0"
                         style="float:right;margin-right: 5px;font-size: 16px;"
                         type="primary"
                         plain
@@ -271,23 +276,23 @@ export default {
             //课程基本信息&&营销信息
             courseCategoryArr: ['1-1', '1-1-1'],
             courseBaseInfoForm: {
+                id: 141, //课程id主键
                 teachmode: '200002',
                 name: '',
                 tags: '',
                 //课程大分类 课程小分类
-                mt : '',
-                st : '',
+                mt : '1-1',
+                st : '1-1-1',
                 grade: '',
                 description: '',
                 users: '',
                 pic: '',
                 charge: '201000',
-                price: '',
-                objectives: '',
+                price: null,
                 qq: '',
                 wechat: '',
                 phone: '',
-                validDays: '',
+                validDays: null,
             },
             courseCategoryOptions: [],
             courseGradeOptions: [
@@ -298,11 +303,12 @@ export default {
                 grade: [{ required: true, message: '请选择课程等级', trigger: 'change' }],
                 users: [{ required: true, message: '适用人群不可以为空', trigger: 'blur' }],
                 charge: [{ required: true, message: '请选择课程收费类型', trigger: 'change' }],
+                price: [{ type: 'number', message: '价格必须为数字', trigger: 'blur' }],
+                validDays: [{type: 'number', message: '有效天数必须为数字', trigger: 'blur' }]
             },
 
             //课程计划信息
-            id: 1,
-            data: []
+            teachPlanData: [],
         }
     },
     created(){
@@ -313,7 +319,7 @@ export default {
             this.axios.get('/courseCategory/treeNodes',)
             .then(res => {
                  if(res.code == 200){
-                    console.log(res.data);
+                    // console.log(res.data);
                     this.courseCategoryOptions = res.data
                  }
             })
@@ -326,33 +332,127 @@ export default {
             this.courseBaseInfoForm.mt = value[0]
             this.courseBaseInfoForm.st = value[1]         
         },
+        //课程封面上传超过一个的回调
+        overLimit(){
+            this.$message.error('只能选择一个课程封面哦')
+        },
         pre(){
              this.active --
         },
         courseBaseNextBtn() {
             this.$refs['courseBaseInfoForm'].validate((valid) => {
-                valid ? this.active ++ :  false
+                if(valid){
+                    this.axios.post('/course/create',this.courseBaseInfoForm)
+                    .then(res => {
+                         if(res.code == 200){
+                            console.log(res.data)
+                            this.$message.success(res.msg)
+                            this.courseBaseInfoForm = res.data
+                            this.active ++ 
+                         }else{
+                            this.$message.error(res.msg)
+                         }      
+                    })
+                    .catch(err => {
+                        console.error(err); 
+                    })
+                }
             })                 
+        },
+        loadTeachPlanTreeNodes(){
+            this.axios.get(`/TeachPlan/treeNodes/${this.courseBaseInfoForm.id}`,)
+            .then(res => {
+                 if(res.code == 200){
+                    this.teachPlanData = res.data
+                 }
+            })
+            .catch(err => {
+                console.error(err); 
+            })
         },
         //添加大章节
         addChapter(){
-            const newChild = { id: this.id++, label: '', children: [],isLeaf:false,free:'201001',video:''};
-            this.data.push(newChild);
+           const saveTeachPlanDto = {
+                id: null,   //课程计划ID
+                pname: '新增章节[点击修改]',
+                parentid: 0,
+                grade: 1,
+                mediaType: '',
+                courseId: this.courseBaseInfoForm.id,
+                coursePubId: '',
+                isPreview: ''
+            }
+            this.axios.post('/TeachPlan/saveTeachPlan',saveTeachPlanDto)
+            .then(res => {
+                if(res.code == 200){
+                    this.$message.success(res.msg)
+                    this.loadTeachPlanTreeNodes()
+                }
+            })
+            .catch(err => {
+                console.error(err); 
+            })
+            // const newChild = { id: this.NodeId++, label: '', children: [],isLeaf:false,free:'201001',video:''};
+            // this.data.push(newChild);
         },
         //添加小节
         append(data) {
-            const newChild = { id: this.id++, label: '', children: [], isLeaf:true, free:'201001',video:''};
-            if (!data.children) {
-               this.$set(data, 'children', []);
+            const saveTeachPlanDto = {
+                id: null,   //课程计划ID
+                pname: '新增小结[点击修改]',
+                parentid: data.id,
+                grade: 2,
+                mediaType: '',
+                courseId: this.courseBaseInfoForm.id,
+                coursePubId: '',
+                isPreview: ''
             }
-            data.children.push(newChild);
+            this.axios.post('/TeachPlan/saveTeachPlan',saveTeachPlanDto)
+            .then(res => {
+                if(res.code == 200){
+                    this.$message.success(res.msg)
+                    this.loadTeachPlanTreeNodes()
+                }
+            })
+            .catch(err => {               
+                console.error(err); 
+            })
+            // const newChild = { id: this.NodeId++, label: '', children: [],isLeaf:true, free:'201001',video:''};
+            // if (!data.children) {
+            //    this.$set(data, 'children', []);
+            // }
+            // data.children.push(newChild);
        },
-        remove(node, data) {
-            const parent = node.parent;
-            const children = parent.data.children || parent.data;
-            let index = children.findIndex(d => d.id === data.id);
-            children.splice(index, 1);
-        },
+       editCoursePlan(data){
+        const saveTeachPlanDto = {
+                id: data.id,   //课程计划ID
+                pname:data.pname,
+                parentid: data.parentid,
+                grade: data.grade,
+                mediaType: data.mediaType,
+                courseId: this.courseBaseInfoForm.id,
+                coursePubId: data.coursePubId,
+                isPreview: data.isPreview
+            }
+            this.axios.post('/TeachPlan/saveTeachPlan',saveTeachPlanDto)
+                .then(res => {
+                    if(res.code == 200){
+                        this.$message.success(res.msg)
+                        this.loadTeachPlanTreeNodes()
+                    }
+                })
+                .catch(err => {               
+                    console.error(err); 
+                })
+       },
+
+       //删除小节
+        // remove(node, data) {
+        //     const parent = node.parent;
+        //     const children = parent.data.children || parent.data;
+        //     let index = children.findIndex(d => d.id === data.id);
+        //     children.splice(index, 1);
+        // },
 
     },
 }

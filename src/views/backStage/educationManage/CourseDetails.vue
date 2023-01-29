@@ -115,6 +115,7 @@
                 </el-pagination>
             <!-- 分页end -->
             </el-card>
+
         </div>      
     </template>
     
@@ -137,7 +138,7 @@
 import DetailsTag from '@/components/DetailsTag.vue'
 export default {
     components :{
-        DetailsTag
+        DetailsTag,
     },
     data() {
         return {
@@ -187,10 +188,10 @@ export default {
         },
 
         addCourse(){
-            this.$router.push('/manage/addCourse')
+           this.$router.push('/manage/addCourse')
         },
         handleEdit(index,row){
-
+            this.$router.push({path:'/manage/editRecordsCourse',query: {courseId:row.id}})
         },
         handleDelete(index,row){
             
