@@ -65,13 +65,22 @@
                         </el-input>
                     </el-form-item>
                     <el-form-item label="课程封面">
-                        <el-upload
-                            action="https://jsonplaceholder.typicode.com/posts/"
-                            list-type="picture-card"
-                            :limit="1"
-                            :on-exceed="overLimit">
-                            <i class="el-icon-plus"></i>
-                        </el-upload>
+                    <el-upload
+                        action="http://localhost:63010/media/upload/file"
+                        list-type="picture-card"
+                        :limit="1"
+                        :on-exceed="overLimit"
+                        :on-success="onSuccess"
+                        >
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    </el-form-item>
+                    <el-form-item label="当前封面">
+                            <el-image
+                            style="width: 150px; height: 150px;"
+                            :src="coursePic"
+                            >
+                            </el-image>
                     </el-form-item>
                     <el-form-item label="课程类型" prop="charge">
                         <el-radio v-model="courseBaseInfoForm.charge" label="201000">免费</el-radio>
@@ -113,8 +122,7 @@
                         </el-input> 
                     </el-form-item>
                 </el-form>
-                  <el-button @click="pre()"  class="pre_btn" size="medium">上一步</el-button>
-                  <el-button type="primary" ckass="next_btn" @click="courseBaseNextBtn()" size="medium">保存并进行下一步</el-button>
+                  <el-button type="primary" ckass="next_btn" @click="courseBaseNextBtn()" size="medium" style="margin-left:50%">保存并进行下一步</el-button>
             </div>
     
             <!-- 2 课程计划-->
@@ -237,7 +245,7 @@
                 //课程基本信息&&营销信息
                 courseCategoryArr: ['1-1', '1-1-1'],
                 courseBaseInfoForm: {
-                    id: 141, //课程id主键
+                    id: null, //课程id主键
                     teachmode: '200002',
                     name: '',
                     tags: '',
@@ -255,6 +263,7 @@
                     phone: '',
                     validDays: null,
                 },
+                coursePic: '',
                 courseCategoryOptions: [],
                 courseGradeOptions: [
                     {value:"204001", label:"初级"},{value:"204002", label:"中级"},{value:"204003", label:"高级"}
@@ -280,10 +289,12 @@
         },
         methods: {
             loadCourseBaseInfo(){
-                this.axios.get(`/course/baseInfo/${this.$route.query.courseId}`,)
+                const fileUrlPrefix = 'http://localhost:9000'
+                this.axios.get(`/content/course/baseInfo/${this.$route.query.courseId}`,)
                 .then(res => {
                      if(res.code == 200){
                         this.courseBaseInfoForm = res.data
+                        this.coursePic = fileUrlPrefix + res.data.pic
                      }
                 })
                 .catch(err => {
@@ -291,7 +302,7 @@
                 })
             },
             getCourseCategoryTreeNodes(){
-                this.axios.get('/courseCategory/treeNodes',)
+                this.axios.get('/content/courseCategory/treeNodes',)
                 .then(res => {
                      if(res.code == 200){
                         // console.log(res.data);
@@ -317,7 +328,7 @@
             courseBaseNextBtn() {
                 this.$refs['courseBaseInfoForm'].validate((valid) => {
                     if(valid){
-                        this.axios.post('/course/create',this.courseBaseInfoForm)
+                        this.axios.post('/content/course/create',this.courseBaseInfoForm)
                         .then(res => {
                              if(res.code == 200){
                                 console.log(res.data)
@@ -335,7 +346,7 @@
                 })                 
             },
             loadTeachPlanTreeNodes(){
-                this.axios.get(`/TeachPlan/treeNodes/${this.$route.query.courseId}`,)
+                this.axios.get(`/content/TeachPlan/treeNodes/${this.$route.query.courseId}`,)
                 .then(res => {
                      if(res.code == 200){
                         this.teachPlanData = res.data
@@ -357,7 +368,7 @@
                     coursePubId: '',
                     isPreview: ''
                 }
-                this.axios.post('/TeachPlan/saveTeachPlan',saveTeachPlanDto)
+                this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                 .then(res => {
                     if(res.code == 200){
                         this.$message.success(res.msg)
@@ -382,7 +393,7 @@
                     coursePubId: '',
                     isPreview: ''
                 }
-                this.axios.post('/TeachPlan/saveTeachPlan',saveTeachPlanDto)
+                this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                 .then(res => {
                     if(res.code == 200){
                         this.$message.success(res.msg)
@@ -409,7 +420,7 @@
                     coursePubId: data.coursePubId,
                     isPreview: data.isPreview
                 }
-                this.axios.post('/TeachPlan/saveTeachPlan',saveTeachPlanDto)
+                this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                     .then(res => {
                         if(res.code == 200){
                             this.$message.success(res.msg)
@@ -428,6 +439,17 @@
             //     let index = children.findIndex(d => d.id === data.id);
             //     children.splice(index, 1);
             // },
+
+            //文件上传的回调
+            onSuccess(res,file, fileList){
+                const fileUrlPrefix = 'http://localhost:9000'
+                if(res.code == 200){
+                    this.courseBaseInfoForm.pic = res.data.url
+                    this.coursePic = fileUrlPrefix + res.data.url
+                }else{
+                    this.$message.error('上传失败')
+                }
+            },
     
         },
     }

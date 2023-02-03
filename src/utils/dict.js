@@ -12,6 +12,14 @@ export default {
         //课程发布状态
         if(code == "203001") return "未发布"
         if(code == "203002") return "已发布"
-        if(code == "203003") return "已下线" 
+        if(code == "203003") return "已下线"
+        //媒资类型
+        if(code == "001001") return "图片"
+        if(code == "001002") return "视频"
+        if(code == "001003") return "其他"
+        //对象(媒资)的审核状态
+        if(code == "002001") return "审核未通过"
+        if(code == "002002") return "未审核" 
+        if(code == "002003") return "审核通过" 
     }
 }

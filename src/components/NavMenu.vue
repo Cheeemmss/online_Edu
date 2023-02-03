@@ -8,7 +8,7 @@
                     <template slot="title"><i class="el-icon-school"></i>教务教学</template>
                     <el-menu-item index="/manage/courseManage">课程管理</el-menu-item>
                     <el-menu-item index="2-2">直播管理</el-menu-item>
-                    <el-menu-item index="2-3">媒资管理</el-menu-item>
+                    <el-menu-item index="/manage/mediaManage">媒资管理</el-menu-item>
                     <el-menu-item index="2-4">作业管理</el-menu-item>
                     <el-menu-item index="2-5">评价管理</el-menu-item>
                     <el-menu-item index="2-6">作业批改</el-menu-item>

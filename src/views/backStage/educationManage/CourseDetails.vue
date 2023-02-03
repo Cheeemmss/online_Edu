@@ -115,7 +115,7 @@
                 </el-pagination>
             <!-- 分页end -->
             </el-card>
-
+            
         </div>      
     </template>
     
@@ -166,7 +166,7 @@ export default {
         },
         methods: {
         load(){
-            this.axios.post(`/course/list?pageNo=${this.pageNo}&pageSize=${this.pageSize}`,this.queryCourseParams)
+            this.axios.post(`/content/course/list?pageNo=${this.pageNo}&pageSize=${this.pageSize}`,this.queryCourseParams)
             .then(res => {
                 // console.log(res.data)
                 if(res.code == 200){

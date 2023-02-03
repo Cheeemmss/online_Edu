@@ -24,6 +24,11 @@ const routes = [
         name: 'editRecordsCourse',
         path: 'editRecordsCourse',
         component: ()=>import('@/views/backStage/educationManage/EditRecordCourse.vue')
+       },
+       {
+         name: 'mediaManage',
+         path: 'mediaManage',
+         component: ()=>import('@/views/backStage/educationManage/MediaDetails.vue')
        }
     ] 
   }
