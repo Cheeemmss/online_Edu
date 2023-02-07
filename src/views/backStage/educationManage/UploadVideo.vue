@@ -32,9 +32,15 @@
             </template>
         </el-table-column>
         </el-table>
+        <el-upload
+            :show-file-list="false"
+            action="#"
+            :limit="1"
+            :http-request="uploadVideo"
+            :file-list="fileList">
+            <el-button size="small" type="primary">点击上传</el-button>
+        </el-upload>
     <div slot="footer" class="dialog-footer">
-      <el-button @click="">选择文件</el-button>
-      <el-button type="primary" @click="">上传文件</el-button>
     </div>
   </el-dialog>
 </template>
@@ -43,9 +49,11 @@
 </style>
 
 <script>
+import chunkUtil from '@/utils/chunk.js'
 export default {
     data(){
-        return {          
+        return {    
+            fileList: [],      
             uploadVideoData:[
                 {
                     filename: 'file1',
@@ -64,6 +72,10 @@ export default {
     methods: {
         close(){
             this.$emit('closeUploadVideoDialog')
+        },
+        uploadVideo(options){
+             chunkUtil.readFileMd5(options.file)
+             this.fileList = []  //解决上传一次后需刷新才能上传第二次的问题       
         },
         handleDelete(){
 
