@@ -143,7 +143,6 @@ data() {
     load(){
         this.axios.post(`/media/list?pageNo=${this.pageNo}&pageSize=${this.pageSize}`,this.QueryMediaParamsDto)
         .then(res => {
-            console.log(res.data)
             if(res.code == 200){
                 this.MediaData = res.data.records
                 this.total = res.data.total

@@ -1,38 +1,14 @@
 <template>  
-  <el-dialog title="上传文件" :visible.sync="uploadDialogVisible" :before-close="close" width="45%">
-        <el-table
-        :data="uploadVideoData"
-        style="width: 100%">
-        <el-table-column
-            prop="filename"
-            label="文件名"
-            width="250">
-        </el-table-column>
-        <el-table-column
-            prop="filesize"
-            label="文件大小"
-            width="150">
-        </el-table-column>
-        <el-table-column
-            prop="percentage"
-            label="状态"
-            width="300">
-            <template slot-scope="scope">
-                <el-progress :percentage="scope.row.percentage"></el-progress>
-            </template>    
-        </el-table-column>
-        <el-table-column
-            label="操作">
-            <template slot-scope="scope">
-                <el-button
-                    size="mini"
-                    type="danger"
-                    @click="handleDelete(scope.$index, scope.row)">删除
-                </el-button>
-            </template>
-        </el-table-column>
-        </el-table>
+  <el-dialog title="上传视频" :visible.sync="uploadDialogVisible" :before-close="close" width="30%">
+    <el-card>
+        <el-progress type="circle" :percentage="percentage" :status="isSuccess" class="progress"></el-progress>
+        <el-descriptions direction="vertical" :column="4" style="margin-left: 0px;margin-bottom: 20px;" border>
+            <el-descriptions-item label="文件名">{{ fileName }}</el-descriptions-item>
+            <el-descriptions-item label="文件大小(B)">{{ fileSize }}</el-descriptions-item>
+        </el-descriptions>
         <el-upload
+            class="upload"
+            :accept="'video/*'"
             :show-file-list="false"
             action="#"
             :limit="1"
@@ -42,10 +18,20 @@
         </el-upload>
     <div slot="footer" class="dialog-footer">
     </div>
+    </el-card>
+
   </el-dialog>
 </template>
 
 <style>
+.upload {
+    margin-left: 200px;
+    margin-top: 30px;
+}
+.progress {
+    margin-left: 175px;
+    margin-bottom: 20px;
+}
 </style>
 
 <script>
@@ -54,13 +40,10 @@ export default {
     data(){
         return {    
             fileList: [],      
-            uploadVideoData:[
-                {
-                    filename: 'file1',
-                    filesize: 600,
-                    percentage: 60
-                }
-            ]
+            isSuccess: null,
+            fileName: '暂未选择文件',
+            fileSize: 0,
+            percentage: 0,
         }
     },
     props :{
@@ -69,17 +52,30 @@ export default {
             default: false
         }
     },
+    watch: {
+        percentage: 'handleSuccess'
+    },
     methods: {
         close(){
             this.$emit('closeUploadVideoDialog')
         },
         uploadVideo(options){
-             chunkUtil.readFileMd5(options.file)
-             this.fileList = []  //解决上传一次后需刷新才能上传第二次的问题       
+             this.isSuccess = null
+             this.percentage = 0
+             this.fileName = options.file.name
+             this.fileSize = options.file.size
+             chunkUtil.readFileMd5(options.file,this.percentageChange)          
+             this.fileList = []  //解决上传一次后需刷新才能上传第二次的问题
         },
-        handleDelete(){
-
+        percentageChange(val){
+             this.percentage = val
+        },
+        handleSuccess(val){
+             if(val == 100){
+                this.isSuccess = 'success'
+             } 
         }
+
     }
 
 }
