@@ -14,7 +14,7 @@
             :limit="1"
             :http-request="uploadVideo"
             :file-list="fileList">
-            <el-button size="small" type="primary">点击上传</el-button>
+            <el-button size="small" type="primary">选择文件</el-button>
         </el-upload>
     <div slot="footer" class="dialog-footer">
     </div>
@@ -64,7 +64,7 @@ export default {
              this.percentage = 0
              this.fileName = options.file.name
              this.fileSize = options.file.size
-             chunkUtil.readFileMd5(options.file,this.percentageChange)          
+             chunkUtil.computeFileMd5(options.file,this.percentageChange)          
              this.fileList = []  //解决上传一次后需刷新才能上传第二次的问题
         },
         percentageChange(val){

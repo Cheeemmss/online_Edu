@@ -89,6 +89,7 @@
         <!-- 分页end -->
         </el-card>
         <UploadVideo :uploadDialogVisible="uploadDialogVisible" @closeUploadVideoDialog="closeUploadVideoDialog"></UploadVideo>
+        <el-backtop></el-backtop>
     </div>      
 </template>
 
@@ -119,7 +120,7 @@ data() {
     return {
         MediaData: [],
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 12,
         total: 0,
         //媒资查询过滤条件
         QueryMediaParamsDto: {

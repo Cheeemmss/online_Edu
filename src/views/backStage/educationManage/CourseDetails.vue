@@ -115,7 +115,7 @@
                 </el-pagination>
             <!-- 分页end -->
             </el-card>
-            
+            <el-backtop></el-backtop>           
         </div>      
     </template>
     
@@ -144,7 +144,7 @@ export default {
         return {
             courseData: [],
             pageNo: 1,
-            pageSize: 10,
+            pageSize: 12,
             total: 0,
             //课程查询过滤条件
             queryCourseParams: {

@@ -2,11 +2,11 @@ import CryptoJS from 'crypto-js'
 import request from '@/utils/request.js'
 import axios from 'axios'
 import ElementUI from 'element-ui';
+import SparkMD5 from 'spark-md5';
 export default {
 
     fileMd5: '',  //当前上传文件的md5值
  
-
     //获取某块分片的数据
     getChunkInfo(file,currentChunk,chunkSize){
         let start = currentChunk * chunkSize;
@@ -15,21 +15,49 @@ export default {
         return chunk;
     },
 
+   //计算文件md5值 
+    computeFileMd5(file,percentageChange){
+        const chunkSize = 2 * 1024 * 1024                 
+        const chunkNum = Math.ceil(file.size / chunkSize)
+        let fileReader = new FileReader() 
+        let spark = new SparkMD5.ArrayBuffer()
+        let currentChunk = 0
+
+        let begin = new Date().getTime()
+        ElementUI.Notification({
+            title: 'info',
+            message: `文件解析中 请稍等`,
+            type: 'info'
+        });
+        fileReader.readAsArrayBuffer(this.getChunkInfo(file,currentChunk,chunkSize))
+    
+        fileReader.addEventListener('load',(e) => {
+            spark.append(e.target.result)
+            if(currentChunk < chunkNum){
+                currentChunk ++ 
+                fileReader.readAsArrayBuffer(this.getChunkInfo(file,currentChunk,chunkSize))
+            }else{
+                let md5 = spark.end()
+                spark.destroy()
+                this.fileMd5 = md5
+                let end = new Date().getTime()
+                let time = end - begin
+                console.log('文件md5为:' + md5 + " 计算md5用时: " + time + "ms")
+                this.checkFile(file,percentageChange)
+            }
+        }) 
+    },
+
+    
+
     //判断文件是否存在(已上传)
-    readFileMd5(file,percentageChange){
-        let fileRederInstance = new FileReader();
-        fileRederInstance.readAsBinaryString(file);
-        fileRederInstance.addEventListener("load", (e) => {
-            let fileBolb = e.target.result
-            const fileMd5 = CryptoJS.MD5(CryptoJS.enc.Latin1.parse(fileBolb)).toString()
-            console.log("大文件的md5:"+ fileMd5);
-            this.fileMd5 = fileMd5
-            request.get(`/media/checkFile/${fileMd5}`,)
+    checkFile(file,percentageChange){
+            request.get(`/media/checkFile/${this.fileMd5}`,)
             .then(res => {
                 if(res.code == 200 && res.data == false){
                     this.readChunkMD5(0,file,percentageChange)
                 }else{
-                    percentageChange(100)//已上传过完全相同的文件则不需要上传(秒传)
+                    percentageChange(100) //已上传过完全相同的文件则不需要上传(秒传)
                     ElementUI.Notification({
                         title: 'success',
                         message: `文件 ${file.name} 已上传成功`,
@@ -40,13 +68,12 @@ export default {
             .catch(err => {
                 console.error(err); 
             })       
-        });
     },
 
 
     // 针对每个分片文件进行上传处理
      readChunkMD5(num,file,percentageChange){
-            const chunkSize = 1 * 1024 * 1024                 //分片大小(2M)
+            const chunkSize = 2 * 1024 * 1024                 //分片大小(2M)
             const chunkNum = Math.ceil(file.size / chunkSize) //分片数
             // console.log("chunkNum:"+chunkNum);
             if (num <= chunkNum - 1) {
