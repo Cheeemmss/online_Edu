@@ -144,7 +144,7 @@ export default {
         return {
             courseData: [],
             pageNo: 1,
-            pageSize: 12,
+            pageSize: 10,
             total: 0,
             //课程查询过滤条件
             queryCourseParams: {

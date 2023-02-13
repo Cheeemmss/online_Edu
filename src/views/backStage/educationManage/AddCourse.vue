@@ -394,8 +394,9 @@ export default {
             this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
             .then(res => {
                 if(res.code == 200){
-                    this.$message.success(res.msg)
                     this.loadTeachPlanTreeNodes()
+                }else{
+                    this.$message.error(res.msg)
                 }
             })
             .catch(err => {
@@ -419,8 +420,10 @@ export default {
             this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
             .then(res => {
                 if(res.code == 200){
-                    this.$message.success(res.msg)
+                    // this.$message.success(res.msg)
                     this.loadTeachPlanTreeNodes()
+                }else{
+                    this.$message.error(res.msg)
                 }
             })
             .catch(err => {               
@@ -446,8 +449,10 @@ export default {
             this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                 .then(res => {
                     if(res.code == 200){
-                        this.$message.success(res.msg)
+                        // this.$message.success(res.msg)
                         this.loadTeachPlanTreeNodes()
+                    }else{
+                    this.$message.error(res.msg)
                     }
                 })
                 .catch(err => {               

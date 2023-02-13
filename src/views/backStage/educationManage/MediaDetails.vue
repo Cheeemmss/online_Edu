@@ -120,7 +120,7 @@ data() {
     return {
         MediaData: [],
         pageNo: 1,
-        pageSize: 12,
+        pageSize: 10,
         total: 0,
         //媒资查询过滤条件
         QueryMediaParamsDto: {
@@ -171,7 +171,19 @@ data() {
         
     },
     handlePreview(index,row){
-
+        let mediaId = row.id
+        this.axios.get(`/media/preview/${mediaId}`,)
+        .then(res => {
+            if(res.code == 200){
+                const fileUrlPrefix = 'http://localhost:9000'
+                window.open(fileUrlPrefix + res.data,'_blank')
+            }else{
+                this.$message.warning(res.msg)
+            }
+        })
+        .catch(err => {
+            console.error(err); 
+        })
     },
 
   }

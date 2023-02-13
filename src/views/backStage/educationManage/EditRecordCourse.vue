@@ -139,18 +139,23 @@
                         placeholder="请输入章节名称" maxlength="25" show-word-limit clearable @blur="editCoursePlan(data)">
                        </el-input>
     
-                        <el-input v-if="data.parentid != 0" style="width:200px;margin-left: 10px;" v-model="data.video" 
+                        <el-autocomplete v-if="data.parentid != 0" style="width:300px;margin-left: 10px;" v-model="data.teachplanMedia.mediaFilename"
+                        clearable
+                        :fetch-suggestions="queryMediasAsync"
+                        @select="handleSelect"
                         placeholder="请选择章节视频">
-                        </el-input>  
-    
-                        <el-switch  
+                        </el-autocomplete>
+                        <i class="el-icon-check bindingBtn"  v-if="data.parentid != 0" @click="bindingCourseVideo(data)"></i>  
+                        <i class="el-icon-delete bindingBtn" v-if="data.parentid != 0" ></i>  
+
+                        <!-- <el-switch  
                             v-if="data.parentid != 0"
-                            v-model="data.free"
-                            active-value="201000"
-                            inactive-value="201001"
+                            v-model="data.isPreview"
+                            :active-value=1
+                            :inactive-value=0
                             active-text="免费"
                             style="margin-left:10px;">
-                        </el-switch>
+                        </el-switch> -->
     
                         <el-button
                             style="float:right;font-size: 16px;"
@@ -223,12 +228,18 @@
         height: 65px;
     }
     .custom-tree-node {
-         width: 800px;
+         width: 1000px;
          height: 40px;
          background-color: rgb(241, 241, 241);
          border-radius: 15px;
          padding: 10px;
          line-height: 40px;
+    }
+    .bindingBtn {
+        color: rgb(25, 137, 250);
+        font-weight: 900;
+        font-size: 22px;
+        margin-left: 10px;
     }
     </style>
     <script>
@@ -279,6 +290,7 @@
     
                 //课程计划信息
                 teachPlanData: [],
+                currentMeidaData:{}
             }
         },
         created(){
@@ -328,10 +340,9 @@
             courseBaseNextBtn() {
                 this.$refs['courseBaseInfoForm'].validate((valid) => {
                     if(valid){
-                        this.axios.post('/content/course/create',this.courseBaseInfoForm)
+                        this.axios.put('/content/course/CourseBase',this.courseBaseInfoForm)
                         .then(res => {
                              if(res.code == 200){
-                                console.log(res.data)
                                 this.$message.success(res.msg)
                                 this.courseBaseInfoForm = res.data
                                 this.active ++ 
@@ -366,13 +377,14 @@
                     mediaType: '',
                     courseId: this.courseBaseInfoForm.id,
                     coursePubId: '',
-                    isPreview: ''
+                    isPreview: 0
                 }
                 this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                 .then(res => {
                     if(res.code == 200){
-                        this.$message.success(res.msg)
                         this.loadTeachPlanTreeNodes()
+                    }else{
+                        this.$message.error(res.msg)
                     }
                 })
                 .catch(err => {
@@ -391,13 +403,14 @@
                     mediaType: '',
                     courseId: this.courseBaseInfoForm.id,
                     coursePubId: '',
-                    isPreview: ''
+                    isPreview: 0
                 }
                 this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                 .then(res => {
                     if(res.code == 200){
-                        this.$message.success(res.msg)
                         this.loadTeachPlanTreeNodes()
+                    }else{
+                        this.$message.error(res.msg)
                     }
                 })
                 .catch(err => {               
@@ -423,15 +436,62 @@
                 this.axios.post('/content/TeachPlan/saveTeachPlan',saveTeachPlanDto)
                     .then(res => {
                         if(res.code == 200){
-                            this.$message.success(res.msg)
                             this.loadTeachPlanTreeNodes()
+                        }else{
+                            this.$message.error(res.msg)
                         }
                     })
                     .catch(err => {               
                         console.error(err); 
                     })
            },
-    
+           //查询已被审核通过可用于绑定的视频
+           queryMediasAsync(mediaName, callback){
+                    if(mediaName == undefined || mediaName == null || mediaName == '') return 
+                    this.axios.get(`/media/list/auditMedias?mediaName=${mediaName}`,)
+                    .then(res => {
+                        if(res.code == 200){
+                            const result = []
+                            res.data.forEach(e => {
+                                result.push({'value': e.filename,'mediaId':e.id})
+                            });
+                            callback(result)
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err); 
+                    }) 
+           },
+           handleSelect(data){
+                this.currentMeidaData = data 
+                // console.log(this.currentMeidaData);
+           },
+           bindingCourseVideo(data){
+               const teachplanId = data.teachplanMedia.teachplanId
+               const params = {
+                               'mediaId': this.currentMeidaData.mediaId,
+                               'fileName': this.currentMeidaData.value,
+                               'teachplanId' : teachplanId,
+                              }
+                if(params.mediaId == null || params.mediaId == undefined){
+                    this.$message.warning('请选择一个要绑定的媒资')
+                    return 
+                }
+                // console.log(params)
+                this.axios.post('/content/TeachPlan/binding',params)
+                .then(res => {
+                    if(res.code == 200){
+                        this.$message.success(res.msg)
+                        this.loadTeachPlanTreeNodes()
+                    }else{
+                        this.$message.error(res.msg)
+                    }
+                })
+                .catch(err => {
+                    console.error(err); 
+                })
+           },
+
            //删除小节
             // remove(node, data) {
             //     const parent = node.parent;
