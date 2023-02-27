@@ -4,7 +4,7 @@ export default {
         //课程审核状态
         if(code == "202001") return "审核未通过"
         if(code == "202002") return "未提交"
-        if(code == "202003") return "已提交"
+        if(code == "202003") return "已提交待审核"
         if(code == "202004") return "审核通过"
         //课程模式
         if(code == "200002") return "录播"

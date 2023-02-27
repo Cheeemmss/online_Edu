@@ -90,14 +90,17 @@
                         type="primary"
                         @click="handlePreview(scope.$index, scope.row)">预览</el-button>
                         <el-button
+                        :disabled="scope.row.auditStatus == '202003'"
                         size="mini"
                         type="primary"
                         @click="handleSubmitForReview(scope.$index, scope.row)">提交审核</el-button>
                         <el-button
+                        :disabled="scope.row.status == '203001' ||  scope.row.auditStatus == '202002' || scope.row.auditStatus == '202003'"
                         size="mini"
                         type="primary"
                         @click="handlePublish(scope.$index, scope.row)">发布</el-button>
                         <el-button
+                        :disabled="scope.row.status != '203002'"
                         size="mini"
                         type="primary"
                         @click="handleTakeDown(scope.$index, scope.row)">下架</el-button>
@@ -197,13 +200,35 @@ export default {
             
         },
         handlePreview(index,row){
-
+            window.open(`http://localhost/api/content/coursepreview/${row.id}`,'_blank')
         },
-        handleSubmintForReview(index,row){
-
+        handleSubmitForReview(index,row){
+            this.axios.post(`/content/courseaudit/commit/${row.id}`,)
+            .then(res => {
+                if(res.code == 200){
+                    this.$message.success(res.msg)
+                    this.load()
+                }else{
+                    this.$message.error(res.msg)
+                }
+            })
+            .catch(err => {
+                console.error(err); 
+            })
         },
         handlePublish(index,row){
-
+            this.axios.post(`/content/coursepublish/${row.id}`,)
+            .then(res => {
+                if(res.code == 200){
+                    this.$message.success(res.msg)
+                    this.load()
+                }else{
+                    this.$message.error(res.msg)
+                }
+            })
+            .catch(err => {
+                console.error(err); 
+            })
         },
         handleTakeDown(index,row){
 

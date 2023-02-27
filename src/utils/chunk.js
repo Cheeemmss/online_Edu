@@ -121,7 +121,7 @@ export default {
                     console.error(err); 
                 })                 
             } else {
-                request.get(`/media/mergeChunk/${this.fileMd5}/${file.name}/${chunkNum}`,)
+                request.get(`/media/mergeChunk/${this.fileMd5}/${file.name}/${chunkNum}`,{timeout:200000}) //分片合并操作比较耗时
                 .then(res => {
                     if(res.code == 200 && res.data == true){
                         percentageChange(100)

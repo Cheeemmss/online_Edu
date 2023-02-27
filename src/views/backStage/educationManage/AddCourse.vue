@@ -452,7 +452,7 @@ export default {
                         // this.$message.success(res.msg)
                         this.loadTeachPlanTreeNodes()
                     }else{
-                    this.$message.error(res.msg)
+                        this.$message.error(res.msg)
                     }
                 })
                 .catch(err => {               

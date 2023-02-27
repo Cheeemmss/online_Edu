@@ -145,7 +145,7 @@
                         @select="handleSelect"
                         placeholder="请选择章节视频">
                         </el-autocomplete>
-                        <i class="el-icon-check bindingBtn"  v-if="data.parentid != 0" @click="bindingCourseVideo(data)"></i>  
+                        <i class="el-icon-check bindingBtn"  v-if="data.parentid != 0" @click="bindingCourseVideo(data)" ></i>  
                         <i class="el-icon-delete bindingBtn" v-if="data.parentid != 0" ></i>  
 
                         <!-- <el-switch  

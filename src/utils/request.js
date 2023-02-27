@@ -4,8 +4,8 @@ import ElementUI from 'element-ui';
 
 
 const request = axios.create({
-	baseURL: 'http://localhost:63010/',
-    timeout: 20000  //部分文件上传请求(合并分片)可能比较耗时
+	baseURL: 'http://localhost/api',
+    timeout: 5000  
 })
 
 // request 拦截器
